@@ -114,7 +114,6 @@ request and response bodies are disabled in the Application Insights logger.
 | Symptom | Check |
 | --- | --- |
 | Claude deployment is unavailable | Confirm region, Marketplace eligibility, and live catalog entry. |
-| Quota or opaque `715-123420` error | Reduce capacity, check quota, and check soft-deleted cognitive accounts that may hold quota. |
 | APIM returns 401 or 403 from a model | Wait for RBAC propagation and verify APIM has Foundry User. |
 | Content Safety returns 403 unexpectedly | Review the configured threshold; lower values are more restrictive. |
 | APIM returns 404 | Verify the output URL and that the request body uses the Claude deployment name `claude`. |

@@ -1,5 +1,36 @@
 # Template Explanation
 
+## Terraform Variants
+
+The repository provides two versions of the same AI Gateway environment:
+
+| Directory | Intended use | Network model | API Management tier |
+| --- | --- | --- | --- |
+| `infra` | Workshop exercises, demonstrations, and short-lived learning environments | Public service endpoints with managed identity authentication | Basic v2 |
+| `infra_private` | Production-oriented deployments that require private network isolation | Public APIM ingress with private outbound access to isolated backends | Standard v2 |
+
+Both versions deploy the Foundry project and models, Content Safety, API
+Management APIs and policies, RBAC, Log Analytics, and Application Insights.
+They use separate Terraform state and resource names, so they can coexist in
+the same subscription.
+
+The private version adds:
+
+- A virtual network with a dedicated APIM integration subnet and a separate
+  private endpoint subnet.
+- APIM Standard v2 outbound virtual network integration. The APIM gateway,
+  management plane, and developer portal remain publicly accessible.
+- Private endpoints and private DNS zones for Foundry, Azure OpenAI, Content
+  Safety, Log Analytics, and Application Insights.
+- An Azure Monitor Private Link Scope for private telemetry ingestion and
+  queries.
+- Disabled public network access on Foundry, Content Safety, Log Analytics,
+  and Application Insights.
+
+Direct access to private service endpoints, including Azure Monitor queries,
+requires connectivity to the virtual network and its private DNS zones. Client
+applications continue to call APIM through its public gateway URL.
+
 ## Request Flow
 
 1. An application calls API Management with an APIM subscription key.
@@ -14,15 +45,17 @@
 | Resource | Configuration and purpose |
 | --- | --- |
 | Resource group | Contains all attendee workshop resources. |
-| User-assigned identity | Assigned to the Foundry project and granted Foundry User. |
 | Foundry account | `AIServices`, S0, project management enabled, local keys disabled. |
 | Foundry project | Uses the user-assigned identity. |
 | GPT deployment | AzureRM deployment named `gpt`; model/version/SKU/capacity are inputs. |
 | Claude deployment | AzAPI child named `claude`; includes required Anthropic Marketplace attestation. |
 | Content Safety | S0 resource used by both APIM policies; local keys disabled. |
-| API Management | Basic v2 with a system-assigned identity and subscription-protected APIs. |
+| API Management | Basic v2 in `infra`; Standard v2 with public ingress and outbound VNet integration in `infra_private`. Both use a system-assigned identity and subscription-protected APIs. |
 | Log Analytics | PerGB2018 workspace with 30-day retention. |
 | Application Insights | Workspace-based request and dependency telemetry. |
+| Virtual network | Private variant only. Contains dedicated APIM integration and private endpoint subnets. |
+| Private endpoints and DNS | Private variant only. Privately resolves and reaches AI Services, Content Safety, and Azure Monitor. |
+| Azure Monitor Private Link Scope | Private variant only. Isolates Log Analytics and Application Insights ingestion and queries. |
 
 Claude uses one `azapi_resource` because the AzureRM deployment schema does
 not expose Anthropic's required `modelProviderData` block. Schema validation is
@@ -87,11 +120,17 @@ Naming, region, publisher information, model catalog values, capacities, token
 limits, Content Safety threshold, tags, and optional attendee identity are
 inputs. Claude's legal organization attestation is also required.
 
+The private variant also accepts virtual network, APIM subnet, and private
+endpoint subnet address ranges. Its outputs include the virtual network and
+subnet IDs, backend private IP addresses, and the Azure Monitor Private Link
+Scope ID.
+
 Outputs contain resource IDs and gateway URLs only. Keys, connection strings,
 and other credentials are deliberately excluded.
 
 ## Intentionally Excluded
 
-To keep the workshop focused, the template does not deploy application code,
-private endpoints, VNets, semantic caching, Redis, load balancing, multi-region
-failover, custom domains, alerts, dashboards, remote Terraform state, or CI/CD.
+Neither version deploys application code, semantic caching, Redis, load
+balancing, multi-region failover, custom domains, alerts, dashboards, remote
+Terraform state, CI/CD, Azure Front Door, or Application Gateway. The workshop
+version also intentionally excludes VNets and private endpoints.

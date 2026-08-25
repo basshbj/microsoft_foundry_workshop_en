@@ -13,7 +13,6 @@ resource "azurerm_api_management" "main" {
   tags = local.tags
 }
 
-
 # ---  GPT ---
 # Backend
 resource "azurerm_api_management_backend" "gpt" {

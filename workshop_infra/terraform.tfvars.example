@@ -1,0 +1,35 @@
+prefix          = "foundry"
+attendee        = "demo"
+location        = "eastus2"
+publisher_name  = "Foundry Workshop"
+publisher_email = "owner@example.com"
+
+# Use the legal organization details that will accept Anthropic Marketplace terms.
+claude_organization_name = "Contoso"
+claude_country_code      = "US"
+claude_industry          = "technology"
+
+# Optional Microsoft Entra object ID for attendee access.
+# attendee_principal_id = "00000000-0000-0000-0000-000000000000"
+
+gpt_model = {
+  name     = "gpt-5"
+  version  = "2025-08-07"
+  sku_name = "GlobalStandard"
+  capacity = 10
+}
+
+claude_model = {
+  name     = "claude-haiku-4-5"
+  version  = "2"
+  sku_name = "GlobalStandard"
+  capacity = 10
+}
+
+gpt_tokens_per_minute    = 10000
+claude_tokens_per_minute = 10000
+content_safety_threshold = 4
+
+tags = {
+  environment = "workshop"
+}

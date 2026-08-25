@@ -4,6 +4,10 @@ location        = "eastus2"
 publisher_name  = "Foundry Workshop"
 publisher_email = "owner@example.com"
 
+virtual_network_address_space               = ["10.42.0.0/16"]
+api_management_subnet_address_prefixes      = ["10.42.0.0/27"]
+private_endpoint_subnet_address_prefixes     = ["10.42.1.0/24"]
+
 # Use the legal organization details that will accept Anthropic Marketplace terms.
 claude_organization_name = "Contoso"
 claude_country_code      = "US"
@@ -13,17 +17,17 @@ claude_industry          = "technology"
 # attendee_principal_id = "00000000-0000-0000-0000-000000000000"
 
 gpt_model = {
-  name     = "gpt-4o-mini"
-  version  = "2024-07-18"
+  name     = "gpt-5"
+  version  = "2025-08-07"
   sku_name = "GlobalStandard"
   capacity = 10
 }
 
 claude_model = {
-  name     = "claude-sonnet-4-6"
-  version  = "1"
+  name     = "claude-haiku-4-5"
+  version  = "2"
   sku_name = "GlobalStandard"
-  capacity = 25
+  capacity = 10
 }
 
 gpt_tokens_per_minute    = 10000
@@ -31,5 +35,5 @@ claude_tokens_per_minute = 10000
 content_safety_threshold = 4
 
 tags = {
-  environment = "workshop"
+  environment = "workshop-private"
 }
