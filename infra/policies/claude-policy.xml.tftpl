@@ -1,0 +1,35 @@
+<policies>
+  <inbound>
+    <base />
+    <set-backend-service backend-id="${backend_id}" />
+    <authentication-managed-identity resource="https://ai.azure.com" />
+    <set-header name="anthropic-version" exists-action="override">
+      <value>2023-06-01</value>
+    </set-header>
+    <llm-token-limit
+      counter-key="@(context.Subscription.Id)"
+      tokens-per-minute="${tokens_per_minute}"
+      estimate-prompt-tokens="true"
+      remaining-tokens-header-name="x-ratelimit-remaining-tokens" />
+    <llm-content-safety
+      backend-id="${content_safety_backend_id}"
+      shield-prompt="true"
+      enforce-on-completions="true">
+      <categories output-type="EightSeverityLevels">
+        <category name="Hate" threshold="${content_safety_threshold}" />
+        <category name="SelfHarm" threshold="${content_safety_threshold}" />
+        <category name="Sexual" threshold="${content_safety_threshold}" />
+        <category name="Violence" threshold="${content_safety_threshold}" />
+      </categories>
+    </llm-content-safety>
+  </inbound>
+  <backend>
+    <forward-request timeout="120" />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>
