@@ -28,29 +28,7 @@ az provider register --namespace Microsoft.Insights
 az provider register --namespace Microsoft.OperationalInsights
 ```
 
-## 2. Check Model Availability and Quota
-
-The example uses `eastus2`, `gpt-4o-mini`, and `claude-sonnet-4-6`.
-Availability changes, so check the live catalog before deployment:
-
-```powershell
-az cognitiveservices model list --location eastus2 --output table
-az cognitiveservices usage list --location eastus2 --output table
-```
-
-Claude also requires:
-
-- An eligible subscription and billing account
-- A supported country or region
-- Anthropic Marketplace access
-- Accurate legal organization attestation values
-
-Review the Anthropic commercial terms, usage policy, supported-region policy,
-and the matching live Azure Marketplace offer before continuing. Terraform
-sends the organization name, country, and industry from your variable file to
-accept that offer during deployment.
-
-## 3. Configure Variables
+## 2. Configure Variables
 
 From the repository root:
 
@@ -69,7 +47,7 @@ Edit `infra/terraform.tfvars` and set at least:
 Capacity is expressed in thousands of tokens per minute for the example
 Global Standard deployments. Do not commit `terraform.tfvars`.
 
-## 4. Validate and Deploy
+## 3. Validate and Deploy
 
 ```powershell
 Set-Location infra
@@ -83,64 +61,33 @@ terraform apply main.tfplan
 API Management Basic v2 can take several minutes to provision. Fresh role
 assignments can also take a few minutes to become effective.
 
-## 5. Create an APIM Subscription
-
-Both APIs are attached to the published `ai-gateway` product. Create a
-subscription and retrieve its key:
+## 4. Test Claude
+Install `Anthropic SDK`
 
 ```powershell
-$apimName = terraform output -raw api_management_name
-$resourceGroup = terraform output -raw resource_group_name
-
-az apim subscription create `
-  --resource-group $resourceGroup `
-  --service-name $apimName `
-  --subscription-id workshop-app `
-  --display-name "Workshop application" `
-  --scope "/products/ai-gateway"
-
-$subscriptionKey = az apim subscription keys list `
-  --resource-group $resourceGroup `
-  --service-name $apimName `
-  --subscription-id workshop-app `
-  --query primaryKey --output tsv
+pip install anthropic
 ```
 
-Treat the subscription key as a secret. It is intentionally not a Terraform
-output.
+Run the verify script to generate a simple message and do web search.
+```powershell
+cd ./test
+python claude_verify.py
+```
 
-## 6. Test GPT
+## 5. Test GPT
+Install `OpenAI SDK`
 
 ```powershell
-$gptUrl = terraform output -raw gpt_api_url
-$headers = @{
-  "Ocp-Apim-Subscription-Key" = $subscriptionKey
-  "Content-Type"              = "application/json"
-}
-$body = @{
-  messages   = @(@{ role = "user"; content = "Give one Azure workshop tip." })
-  max_tokens = 100
-} | ConvertTo-Json -Depth 5
-
-Invoke-RestMethod -Method Post -Uri $gptUrl -Headers $headers -Body $body
+pip install openai
 ```
 
-## 7. Test Claude
-
-The request body uses the deployment name `claude`, not the catalog model ID.
-
+Run the verify script to generate a simple message and do web search.
 ```powershell
-$claudeUrl = terraform output -raw claude_api_url
-$body = @{
-  model      = "claude"
-  max_tokens = 100
-  messages   = @(@{ role = "user"; content = "Give one Azure workshop tip." })
-} | ConvertTo-Json -Depth 5
-
-Invoke-RestMethod -Method Post -Uri $claudeUrl -Headers $headers -Body $body
+cd ./test
+python gpt_verify.py
 ```
 
-## 8. Verify Monitoring
+## 6. Verify Monitoring
 
 Allow approximately 15 minutes for an existing Log Analytics workspace, or up
 to two hours for a new workspace, to receive resource logs.
