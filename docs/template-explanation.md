@@ -6,8 +6,8 @@ The repository provides two versions of the same AI Gateway environment:
 
 | Directory | Intended use | Network model | API Management tier |
 | --- | --- | --- | --- |
-| `infra` | Workshop exercises, demonstrations, and short-lived learning environments | Public service endpoints with managed identity authentication | Basic v2 |
-| `infra_private` | Production-oriented deployments that require private network isolation | Public APIM ingress with private outbound access to isolated backends | Standard v2 |
+| `workshop_infra` | Workshop exercises, demonstrations, and short-lived learning environments | Public service endpoints with managed identity authentication | Basic v2 |
+| `prod_infra` | Production-oriented deployments that require private network isolation | Public APIM ingress with private outbound access to isolated backends | Standard v2 |
 
 Both versions deploy the Foundry project and models, Content Safety, API
 Management APIs and policies, RBAC, Log Analytics, and Application Insights.
@@ -50,7 +50,7 @@ applications continue to call APIM through its public gateway URL.
 | GPT deployment | AzureRM deployment named `gpt`; model/version/SKU/capacity are inputs. |
 | Claude deployment | AzAPI child named `claude`; includes required Anthropic Marketplace attestation. |
 | Content Safety | S0 resource used by both APIM policies; local keys disabled. |
-| API Management | Basic v2 in `infra`; Standard v2 with public ingress and outbound VNet integration in `infra_private`. Both use a system-assigned identity and subscription-protected APIs. |
+| API Management | Basic v2 in `workshop_infra`; Standard v2 with public ingress and outbound VNet integration in `prod_infra`. Both use a system-assigned identity and subscription-protected APIs. |
 | Log Analytics | PerGB2018 workspace with 30-day retention. |
 | Application Insights | Workspace-based request and dependency telemetry. |
 | Virtual network | Private variant only. Contains dedicated APIM integration and private endpoint subnets. |
