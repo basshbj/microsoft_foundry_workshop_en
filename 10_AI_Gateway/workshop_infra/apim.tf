@@ -67,7 +67,7 @@ resource "azurerm_api_management_api_policy" "gpt" {
 
   xml_content = templatefile("${path.module}/policies/gpt-policy.xml.tftpl", {
     backend_id                = azurerm_api_management_backend.gpt.name
-    content_safety_backend_id = azurerm_api_management_backend.content_safety.name
+    content_safety_backend_id = azapi_resource.content_safety.name
     tokens_per_minute         = var.gpt_tokens_per_minute
     content_safety_threshold  = var.content_safety_threshold
   })
@@ -128,7 +128,7 @@ resource "azurerm_api_management_api_policy" "claude" {
 
   xml_content = templatefile("${path.module}/policies/claude-policy.xml.tftpl", {
     backend_id                = azurerm_api_management_backend.claude.name
-    content_safety_backend_id = azurerm_api_management_backend.content_safety.name
+    content_safety_backend_id = azapi_resource.content_safety.name
     tokens_per_minute         = var.claude_tokens_per_minute
     content_safety_threshold  = var.content_safety_threshold
   })
@@ -136,17 +136,26 @@ resource "azurerm_api_management_api_policy" "claude" {
 
 
 # --- Content Safety ---
-resource "azurerm_api_management_backend" "content_safety" {
-  name                = "content-safety-backend"
-  resource_group_name = azurerm_resource_group.main.name
-  api_management_name = azurerm_api_management.main.name
-  protocol            = "http"
-  url                 = azurerm_cognitive_account.content_safety.endpoint
+resource "azapi_resource" "content_safety" {
+  type                      = "Microsoft.ApiManagement/service/backends@2024-05-01"
+  name                      = "content-safety-backend"
+  parent_id                 = azurerm_api_management.main.id
+  schema_validation_enabled = false
 
-  credentials {
-    authorization {
-      scheme    = "ManagedIdentity"
-      parameter = "https://cognitiveservices.azure.com"
+  body = {
+    properties = {
+      protocol = "http"
+      url      = "https://${azurerm_cognitive_account.content_safety.name}.cognitiveservices.azure.com"
+      credentials = {
+        managedIdentity = {
+          clientId = null
+          resource = "https://cognitiveservices.azure.com"
+        }
+      }
+      tls = {
+        validateCertificateChain = true
+        validateCertificateName  = true
+      }
     }
   }
 }

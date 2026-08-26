@@ -45,6 +45,30 @@ resource "azurerm_api_management_diagnostic" "application_insights" {
   }
 }
 
+# --- API Management Azure Monitor Diagnostic for LLM Logs ---
+resource "azapi_resource" "azure_monitor_diagnostic" {
+  type      = "Microsoft.ApiManagement/service/diagnostics@2025-09-01-preview"
+  name      = "azuremonitor"
+  parent_id = azurerm_api_management.main.id
+
+  body = {
+    properties = {
+      loggerId                = "/loggers/azuremonitor"
+      alwaysLog               = "allErrors"
+      httpCorrelationProtocol = "None"
+      logClientIp             = false
+      verbosity               = "information"
+      sampling = {
+        samplingType = "fixed"
+        percentage   = 100
+      }
+      largeLanguageModel = {
+        logs = "enabled"
+      }
+    }
+  }
+}
+
 # --- API Management Diagnostic Settings to Log Analytics ---
 resource "azurerm_monitor_diagnostic_setting" "api_management" {
   name                           = "apim-to-log-analytics"
